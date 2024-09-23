@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1047407130497",
+    "project_id": "blogintern-e387c",
+    "storage_bucket": "blogintern-e387c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1047407130497:android:1f2fc28332cab9cbdd1a80",
+        "android_client_info": {
+          "package_name": "com.bloggingapp.firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9mBQ9zCMWuy4Qb6XM_GgeTh2GSyIZTEE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
