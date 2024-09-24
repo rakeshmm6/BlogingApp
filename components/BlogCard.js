@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, FlatList, Dimensions, TouchableOpacity } from 'react-native';
 import tw from 'twrnc';
 import {db} from '../firebaseConfig'
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs,doc } from 'firebase/firestore';
 import Icon from 'react-native-fontawesome';
 import {AntDesign} from '@expo/vector-icons'
 
 // Card Component
-const BlogCard = ({onSelect}) => {
+const BlogCard = ({onSelect,blogs}) => {
 
-  const[blogs,setBlogs]=useState([]);
+  const[blogss,setBlogss]=useState([]);
   const imageData = [
     require('../assets/frame.png'),
     require('../assets/frame_1.png'),
@@ -18,19 +18,24 @@ const BlogCard = ({onSelect}) => {
     require('../assets/frame_4.png'),
     require('../assets/frame_5.png'),
   ];
-  useEffect(()=>{
-    const fetchBlogs=async()=>{
-      const querySnapshot = await getDocs(collection(db, "blogs"));
-      const blogsData = querySnapshot.docs.map(doc =>({
-        id: doc.id,
-        ...doc.data(),
-        randomImage: imageData[Math.floor(Math.random()*imageData.length)]
-      }));
-      setBlogs(blogsData);
+  // useEffect(()=>{
+  //   const fetchBlogs=async()=>{
+  //     const querySnapshot = await getDocs(collection(db, "blogs"));
+  //     const blogsData = querySnapshot.docs.map(doc =>({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //       randomImage: imageData[Math.floor(Math.random()*imageData.length)]
+  //     }));
+  //     setBlogss(blogsData);
+  //   };
+  //   fetchBlogs();
+  // },[])
+  const assignRandomImage = (blog) => {
+    return {
+      ...blog,
+      randomImage: imageData[Math.floor(Math.random() * imageData.length)],
     };
-    fetchBlogs();
-  },[])
-  
+  };
   
 
   const screenWidth = Dimensions.get('window').width;
@@ -41,6 +46,7 @@ const BlogCard = ({onSelect}) => {
         <TouchableOpacity style={{ width: screenWidth / 2 - 20 }}
         onPress={()=>onSelect(item)}> 
         <View style={tw`bg-white p-4 m-2 rounded-lg shadow-lg`}>
+         
         <Image
          source={item.randomImage}
          style={tw`h-24 w-full rounded-lg`}
@@ -62,10 +68,10 @@ const BlogCard = ({onSelect}) => {
       
     );
   };
-
+  const blogsWithImages = blogs.map(assignRandomImage);
   return (
     <FlatList
-      data={blogs}
+      data={blogsWithImages}
       renderItem={renderItem}
       keyExtractor={(item) => item.id}
       numColumns={2} // Render two cards side by side

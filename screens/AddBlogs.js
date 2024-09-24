@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView, Image } from 'react-native';
 import tw from 'twrnc';
 import { AntDesign } from '@expo/vector-icons';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import * as ImagePicker from 'expo-image-picker';
 import { getDownloadURL, uploadBytes,ref, getStorage, uploadBytesResumable } from 'firebase/storage';
@@ -16,57 +16,22 @@ const AddBlogScreen = ({ navigation }) => {
   const[image,setImage] = useState(null);
  
   
-  const pickImage= async ()=>{
-    try{
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-    if(!result.canceled && result.assets && result.assets.length > 0){
-     
-      setImage(result.assets[0].uri);
-      //console.log('Image Selected : ',selectedImageUri);
-    }
-  }catch(error){console.error('Error Selecting image: ',error)}
-  }
-  const uploadImage = async ()=>{
-    if(!image) return null;
-    try{
-      //console.log("Starting image upload, image URI:", image)
-
-
-      
-      // const fileref = ref(storage,`blogImages/${new Date().getTime()}`);
-      const response = await fetch(image)
-      const blob = await response.blob();
-     
-
-      const fileRef = ref(storage,`blogImages/${new Date().getTime()}`);
-      await uploadBytes(fileRef, blob);
-      
-      return await getDownloadURL(fileRef); 
-    }catch(e){
-      console.error("Image upload failed : ",e);
-      return null;
-    }
-    
-  }
+  
 
   const handleSave = async () => {
     try {
-      const imageURL = await uploadImage();
+      
 
       const docRef = await addDoc(collection(db, "blogs"), {
-        id: docRef.id,
+       // id: docRef.id,
         title: title,
-        imageURL: imageURL || null,
+        //imageURL: imageURL || null,
         description: description,
         date: new Date().toISOString(),
       });
+      await setDoc(docRef,{id:docRef.id},{merge:true});
       console.log("Document written with ID: ", docRef.id);
-      navigation.goBack();
+      navigation.navigate('Home');
     } catch (e) {
       console.error("Error adding document: ", e);
     }
@@ -96,16 +61,6 @@ const AddBlogScreen = ({ navigation }) => {
           value={description}
           onChangeText={setDescription}
         />
-        <TouchableOpacity
-          style={tw`bg-gray-200 p-3 rounded-md mb-4`}
-          onPress={pickImage}
-        >
-          <Text style={tw`text-center font-bold`}>Select Image</Text>
-        </TouchableOpacity>
-        
-        {image && (
-          <Image source={{ uri: image }} style={tw`w-full h-40 rounded-md mb-4`} />
-        )}
 
         <TouchableOpacity
           style={tw`bg-purple-600 p-3 rounded-md`}

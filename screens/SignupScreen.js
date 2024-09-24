@@ -32,9 +32,7 @@ export default function SignupScreen({ navigation }) {
         {/* Header */}
         <View style={tw`flex-row justify-between items-center mb-8`}>
           <Image source={require('../assets/logo.png')} style={tw`h-8 w-32`} resizeMode="contain" />
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <AntDesign name="close" size={24} color="gray" />
-          </TouchableOpacity>
+         
         </View>
 
         <Text style={tw`text-3xl font-bold mb-8 text-gray-800`}>Sign Up</Text>

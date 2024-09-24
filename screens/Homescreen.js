@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, Image,TouchableOpacity, SafeAreaView, Pressable, Button,TextInput } from 'react-native';
 import tw from 'twrnc'
 import { AntDesign } from '@expo/vector-icons';
 import { auth } from '../firebaseConfig'; 
 import { db } from '../firebaseConfig';
-
+import { getDocs } from 'firebase/firestore';
 import { Dropdown } from 'react-native-element-dropdown';
 import BlogCard from '../components/BlogCard.js';
 import { collection } from 'firebase/firestore';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useIsFocused } from '@react-navigation/native';
 
 const dropData=[
   {labels:"AfterGlow", value:"1"},
@@ -17,7 +19,7 @@ const dropData=[
   
 
 ];  
-const HomeScreen = ({navigation}) => {
+const HomeScreen = ({navigation,route}) => {
   const[profileVisible,setProfileVisible]=useState(false)
   const user= auth.currentUser;
   const [value,setValue]=useState(null)
@@ -25,15 +27,16 @@ const HomeScreen = ({navigation}) => {
   const [blogs,setBlogs]=useState([])
   const [searchActive, setSearchActive] = useState(false); // New state for search bar
   const [searchQuery, setSearchQuery] = useState(''); // To hold search input
+  const [refreshKey, setRefreshKey] = useState(0);
+  const deletedBlogId = route.params?.deletedBlo
+
+  const isFocused = useIsFocused();
 
   const handleLogout = async()=>{
     await auth.signOut();
   }
 
-  useEffect(()=>{
-    fetchBlogs();
-  },[]);
-  const fetchBlogs=async()=>{
+  const fetchBlogs= useCallback(async()=>{
     try{const blogsCollection = collection(db,'blogs');
       const blogSnapshot = await getDocs(blogsCollection);
       const blogList = blogSnapshot.docs.map(doc=>({id : doc.id,...doc.data()}));
@@ -42,14 +45,23 @@ const HomeScreen = ({navigation}) => {
     console.error("Error fetching blogs: ", error);
   }
     
-  }
+  },[]);
   
+  useEffect(()=>{
+    if(isFocused){
+      fetchBlogs();
+    }
+  },[isFocused,fetchBlogs]);
+
+
+
   const handleSelectBlog = (item)=>{
     navigation.navigate('BlogDetailed',{
       title:item.title,
       description:item.description,
       date:item.date,
-      image:item.randomImage
+      image:item.randomImage,
+      id:item.id
     })
   }
 
@@ -140,7 +152,7 @@ const HomeScreen = ({navigation}) => {
     </View>
 
       <View style={tw`flex-row justify-between p-4 `}>
-        <Text>Blog</Text>
+        <Text style={tw`text-2xl mt-2 ml-3 font-bold`}>Blog</Text>
         <View style={tw`flex-row`}>
       {/* Add New Button */}
       <Pressable
@@ -162,9 +174,9 @@ const HomeScreen = ({navigation}) => {
         </View>
       </View>
      
-      <TouchableOpacity onPress={()=>navigation.navigate('BlogDetailed')}>
-      <BlogCard onSelect={handleSelectBlog}/>
-      </TouchableOpacity>
+     {/* onPress={()=>navigation.navigate('BlogDetailed')} */}
+      <BlogCard onSelect={handleSelectBlog} blogs={blogs}/>
+     
         
       </View>
     
